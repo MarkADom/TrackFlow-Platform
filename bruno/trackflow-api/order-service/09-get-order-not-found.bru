@@ -1,0 +1,26 @@
+meta {
+  name: Get Order - 404 Not Found
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{order_service_url}}/api/v1/orders/00000000-0000-0000-0000-000000000000
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 404", function() {
+    expect(res.status).to.equal(404);
+  });
+  test("Error response has status field", function() {
+    expect(res.body.status).to.equal(404);
+  });
+  test("Error response has message", function() {
+    expect(res.body.message).to.be.a("string");
+  });
+  test("Error response has timestamp", function() {
+    expect(res.body.timestamp).to.be.a("string");
+  });
+}

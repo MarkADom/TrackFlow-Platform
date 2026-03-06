@@ -1,0 +1,26 @@
+meta {
+  name: Get Notification Logs by Order ID
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{notification_service_url}}/api/v1/notifications/{{order_id}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Returns array", function() {
+    expect(res.body).to.be.an("array");
+  });
+  test("At least one notification", function() {
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+  test("Has notificationStatus field", function() {
+    expect(res.body[0].notificationStatus).to.be.a("string");
+  });
+}

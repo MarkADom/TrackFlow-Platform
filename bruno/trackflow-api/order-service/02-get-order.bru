@@ -1,0 +1,23 @@
+meta {
+  name: Get Order by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{order_service_url}}/api/v1/orders/{{order_id}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Order ID matches", function() {
+    expect(res.body.id).to.equal(bru.getEnvVar("order_id"));
+  });
+  test("Tracking code matches", function() {
+    expect(res.body.trackingCode).to.equal(bru.getEnvVar("tracking_code"));
+  });
+}

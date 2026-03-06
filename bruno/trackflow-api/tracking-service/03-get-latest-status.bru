@@ -1,0 +1,23 @@
+meta {
+  name: Get Latest Status
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{tracking_service_url}}/api/v1/tracking/{{order_id}}/latest
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Has status field", function() {
+    expect(res.body.status).to.be.a("string");
+  });
+  test("Has trackingCode", function() {
+    expect(res.body.trackingCode).to.equal(bru.getEnvVar("tracking_code"));
+  });
+}

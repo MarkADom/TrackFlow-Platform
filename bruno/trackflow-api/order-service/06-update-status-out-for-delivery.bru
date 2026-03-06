@@ -1,0 +1,31 @@
+meta {
+  name: Update Status - OUT_FOR_DELIVERY
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{order_service_url}}/api/v1/orders/{{order_id}}/status
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "OUT_FOR_DELIVERY",
+    "notes": "Saiu para entrega"
+  }
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Order status updated", function() {
+    expect(res.body.status).to.equal("OUT_FOR_DELIVERY");
+  });
+}

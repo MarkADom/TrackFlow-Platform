@@ -1,0 +1,20 @@
+meta {
+  name: Get Order by Tracking Code
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{order_service_url}}/api/v1/orders/tracking/{{tracking_code}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Tracking code matches", function() {
+    expect(res.body.trackingCode).to.equal(bru.getEnvVar("tracking_code"));
+  });
+}

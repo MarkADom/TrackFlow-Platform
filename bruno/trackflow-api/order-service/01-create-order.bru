@@ -1,0 +1,48 @@
+meta {
+  name: Create Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{order_service_url}}/api/v1/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "origin": "Lisboa",
+    "destination": "Porto",
+    "recipientName": "João Silva",
+    "recipientEmail": "joao.silva@example.com"
+  }
+}
+
+script:post-response {
+  if (res.status === 201 || res.status === 200) {
+    bru.setEnvVar("order_id", res.body.id);
+    bru.setEnvVar("tracking_code", res.body.trackingCode);
+    console.log("Order ID:", res.body.id);
+    console.log("Tracking Code:", res.body.trackingCode);
+  }
+}
+
+tests {
+  test("Status is 201", function() {
+    expect(res.status).to.equal(201);
+  });
+  test("Has id", function() {
+    expect(res.body.id).to.be.a("string");
+  });
+  test("Has trackingCode starting with TF-", function() {
+    expect(res.body.trackingCode).to.match(/^TF-/);
+  });
+  test("Status is CREATED", function() {
+    expect(res.body.status).to.equal("CREATED");
+  });
+}

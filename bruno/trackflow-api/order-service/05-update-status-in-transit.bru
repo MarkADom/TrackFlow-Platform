@@ -1,0 +1,31 @@
+meta {
+  name: Update Status - IN_TRANSIT
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{order_service_url}}/api/v1/orders/{{order_id}}/status
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "IN_TRANSIT",
+    "notes": "Em trânsito para Porto"
+  }
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Order status updated", function() {
+    expect(res.body.status).to.equal("IN_TRANSIT");
+  });
+}
