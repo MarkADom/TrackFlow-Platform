@@ -1,0 +1,15 @@
+# IDE
+.idea
+*.iml
+
+# Gradle
+.gradle
+**/build
+out
+
+# Env
+.env
+.envrc
+
+# OS
+.DS_Store
