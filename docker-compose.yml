@@ -1,119 +1,35 @@
-services:
-  postgres:
-    image: postgres:16
-    container_name: trackflow-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./docker/postgres/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 10s
+# Infrastructure only — Spring Boot services run locally via ./gradlew bootRun
+# PostgreSQL: local instance on localhost:5432
+# Kafka: trackflow-kafka on localhost:9093 (9092 reserved for observability stack)
+#
+# Start:  ./scripts/up.sh
+# Stop:   ./scripts/down.sh
+# Smoke:  ./scripts/smoke.sh
 
+services:
   kafka:
     image: apache/kafka:3.7.1
     container_name: trackflow-kafka
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9093,CONTROLLER://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_NUM_PARTITIONS: 3
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
     ports:
-      - "9092:9092"
+      - "9093:9093"
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9093 --list >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 20s
-
-  order-service:
-    image: gradle:8.14.2-jdk21
-    container_name: trackflow-order-service
-    working_dir: /workspace/service
-    command: ["bash", "-lc", "./gradlew bootRun --no-daemon"]
-    restart: unless-stopped
-    environment:
-      SERVER_PORT: 8081
-      DB_URL: jdbc:postgresql://postgres:5432/orders_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8081:8081"
-    volumes:
-      - ./services/order-service:/workspace/service
-      - gradle-cache:/home/gradle/.gradle
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-
-  tracking-service:
-    image: gradle:8.14.2-jdk21
-    container_name: trackflow-tracking-service
-    working_dir: /workspace/service
-    command: ["bash", "-lc", "./gradlew bootRun --no-daemon"]
-    restart: unless-stopped
-    environment:
-      SERVER_PORT: 8082
-      DB_URL: jdbc:postgresql://postgres:5432/tracking_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8082:8082"
-    volumes:
-      - ./services/tracking-service:/workspace/service
-      - gradle-cache:/home/gradle/.gradle
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-
-  notification-service:
-    image: gradle:8.14.2-jdk21
-    container_name: trackflow-notification-service
-    working_dir: /workspace/service
-    command: ["bash", "-lc", "./gradlew bootRun --no-daemon"]
-    restart: unless-stopped
-    environment:
-      SERVER_PORT: 8083
-      DB_URL: jdbc:postgresql://postgres:5432/notifications_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8083:8083"
-    volumes:
-      - ./services/notification-service:/workspace/service
-      - gradle-cache:/home/gradle/.gradle
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-
-volumes:
-  postgres-data:
-  gradle-cache:
