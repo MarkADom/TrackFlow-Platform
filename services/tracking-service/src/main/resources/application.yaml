@@ -31,6 +31,15 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:3200
+      protocol: grpc
 
 springdoc:
   api-docs:
