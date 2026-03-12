@@ -4,7 +4,7 @@ meta {
   seq: 4
 }
 
-patch {
+put {
   url: {{order_service_url}}/api/v1/orders/{{order_id}}/status
   body: json
   auth: none
