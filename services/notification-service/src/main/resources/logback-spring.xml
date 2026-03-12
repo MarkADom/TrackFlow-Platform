@@ -19,6 +19,8 @@
         </format>
     </appender>
 
+    <logger name="io.opentelemetry.exporter.internal.http.HttpExporter" level="ERROR"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="LOKI"/>
