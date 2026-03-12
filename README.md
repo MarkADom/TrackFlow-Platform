@@ -54,6 +54,10 @@ docker compose down
 | order-service | `8081` | |
 | tracking-service | `8082` | |
 | notification-service | `8083` | |
+| Prometheus | `9090` | Observability stack |
+| Loki | `3100` | Observability stack |
+| Tempo (OTLP HTTP) | `4318` | Observability stack |
+| Grafana | `3000` | Observability stack |
 
 ## Databases
 
@@ -88,6 +92,51 @@ cd services/order-service        && ./gradlew bootRun
 cd services/tracking-service     && ./gradlew bootRun
 cd services/notification-service && ./gradlew bootRun
 ```
+
+## Observability
+
+TrackFlow integrates with a local Grafana LGTM stack (Prometheus, Loki, Tempo, Grafana). The stack runs independently from a separate Compose project — it is not bundled in TrackFlow's `docker-compose.yml`.
+
+**Start the observability stack:**
+
+```bash
+cd /mnt/ai_core/infra/observability && docker compose up -d
+```
+
+Once running, each TrackFlow service automatically pushes metrics, logs, and traces to it. No configuration changes are needed.
+
+**Import the dashboard:**
+
+1. Open Grafana at `http://localhost:3000`
+2. Go to **Dashboards → Import**
+3. Upload `docs/grafana/trackflow-dashboard.json`
+
+The dashboard provides panels for order throughput, failed notifications, HTTP request rate, JVM heap memory, and live service logs.
+
+**Verify data is flowing:**
+
+```bash
+# Metrics
+curl -s http://localhost:8081/actuator/prometheus | grep http_server_requests
+
+# Traces — check Tempo via Grafana Explore (datasource: Tempo)
+
+# Logs — check Loki via Grafana Explore (datasource: Loki)
+# Label filter: app=order-service
+```
+
+## Event Simulator
+
+Generates a realistic load of orders using real Portuguese user data from the [randomuser.me](https://randomuser.me) API and progresses each order through its full lifecycle.
+
+```bash
+./scripts/simulate.sh        # 50 orders (default)
+./scripts/simulate.sh 20     # custom number
+```
+
+Each order is processed in parallel: created, then stepped through `PICKED_UP → IN_TRANSIT → OUT_FOR_DELIVERY → DELIVERED` with 100 ms between transitions. Progress is printed as orders are created and status events are fired. A summary of orders created, Kafka events published, and elapsed time is printed at the end.
+
+Requires `curl` and `jq`.
 
 ## Smoke test
 

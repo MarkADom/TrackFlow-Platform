@@ -68,12 +68,23 @@ Each service owns an isolated PostgreSQL database. No service queries another se
 
 Each service exposes metrics, logs, and traces integrated with the local Grafana LGTM stack.
 
-| Concern | Tool | Endpoint |
+| Concern | Tool | Details |
 |---|---|---|
-| Metrics | Prometheus + Micrometer | `/actuator/prometheus` |
-| Logs | Loki + Logback | — |
-| Traces | Tempo + OpenTelemetry | — |
-| Dashboards | Grafana | `http://localhost:3000` |
+| Metrics | Prometheus + Micrometer | `/actuator/prometheus` on each service; scraped via file-based service discovery |
+| Logs | Loki + loki4j | `loki-logback-appender:1.5.2`; configured in `logback-spring.xml` with labels `app`, `host`, `level` |
+| Traces | Tempo + OpenTelemetry | OTLP HTTP exporter to `localhost:4318`; sampling probability 1.0 |
+| Dashboards | Grafana | `http://localhost:3000`; dashboard source at `docs/grafana/trackflow-dashboard.json` |
 
-Prometheus scrapes all three services via file-based service discovery.
-Loki and Tempo integration is in progress.
+The observability stack (Prometheus, Loki, Tempo, Grafana) runs separately from the TrackFlow services. It is not part of TrackFlow's `docker-compose.yml` — see the README for setup instructions.
+
+### Grafana dashboard
+
+The pre-built dashboard at `docs/grafana/trackflow-dashboard.json` includes five panels:
+
+| Panel | Type |
+|---|---|
+| Total Orders Created | Stat (Prometheus) |
+| Failed Notifications | Stat (Prometheus) |
+| HTTP Request Rate | Time series (Prometheus) |
+| JVM Heap Memory | Time series (Prometheus) |
+| Service Logs | Logs (Loki) |

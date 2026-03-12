@@ -62,3 +62,31 @@ Notable design decisions, the options considered, and the rationale behind each.
 **Decision:** The three Spring Boot services run on the host via `./gradlew bootRun`. Only Kafka runs in Docker.
 
 **Rationale:** Running all services in Docker during active development adds friction: image rebuilds on every code change, port-mapping complexity, and harder debugger attachment. Docker is reserved for infrastructure (Kafka) whose configuration is stable. Services are containerizable but not containerized by default.
+
+---
+
+## 7. Observability Stack Is External to TrackFlow
+
+**Decision:** Prometheus, Loki, Tempo, and Grafana run from a separate Compose project at `/mnt/ai_core/infra/observability/` and are not included in TrackFlow's `docker-compose.yml`.
+
+**Rationale:** The observability stack is shared across multiple local projects. Bundling it inside TrackFlow would cause port conflicts and duplicate resource usage whenever any other project needed the same tools. TrackFlow services treat it as an external dependency and connect to its well-known ports (`9090`, `3100`, `4318`, `3000`).
+
+---
+
+## 8. OTLP HTTP Exporter (port 4318) Instead of gRPC (port 4317)
+
+**Decision:** All three services export traces via OTLP over HTTP to `localhost:4318`, using `opentelemetry-spring-boot-starter:2.10.0` and `micrometer-tracing-bridge-otel`.
+
+**Problem:** The local Tempo instance is configured to receive OTLP over HTTP. The default `otel.exporter.otlp.endpoint` port (`4317`) targets the gRPC receiver; pointing at it with the HTTP exporter causes a silent connection failure with no traces appearing in Tempo.
+
+**Rationale:** Using the HTTP endpoint (`4318`) matches the Tempo configuration without changing the observability stack. Sampling probability is set to `1.0` so all traces are captured during development.
+
+---
+
+## 9. Explicit Batch Settings on the Loki Appender
+
+**Decision:** `logback-spring.xml` on each service explicitly sets `batchMaxItems=100` and `batchTimeoutMs=5000` on the loki4j appender rather than relying on defaults.
+
+**Problem:** On low-traffic services the appender's default batch never filled, and the timeout was long enough that log lines were delayed or dropped entirely during short-lived test runs.
+
+**Rationale:** Explicit settings make flush behaviour predictable regardless of traffic volume. The chosen values (`100` items, `5 s`) are conservative enough to avoid back-pressure while ensuring logs arrive in Loki within a few seconds of being emitted.
