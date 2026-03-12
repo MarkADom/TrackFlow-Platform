@@ -63,3 +63,17 @@ Each service owns an isolated PostgreSQL database. No service queries another se
 - **Decoupled failure domains** — a notification-service outage does not affect order creation or tracking record persistence.
 - **Guaranteed delivery** — events are retained in the topic; consumers can lag and catch up without data loss.
 - **Dead-letter support** — `shipment-events.DLQ` captures events that exhaust notification retries, enabling future reprocessing without blocking the main topic.
+
+## Observability
+
+Each service exposes metrics, logs, and traces integrated with the local Grafana LGTM stack.
+
+| Concern | Tool | Endpoint |
+|---|---|---|
+| Metrics | Prometheus + Micrometer | `/actuator/prometheus` |
+| Logs | Loki + Logback | — |
+| Traces | Tempo + OpenTelemetry | — |
+| Dashboards | Grafana | `http://localhost:3000` |
+
+Prometheus scrapes all three services via file-based service discovery.
+Loki and Tempo integration is in progress.
