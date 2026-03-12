@@ -40,6 +40,10 @@ otel:
     otlp:
       endpoint: http://localhost:4318
       protocol: http/protobuf
+    metrics:
+      exporter: none
+    logs:
+      exporter: none
 
 springdoc:
   api-docs:

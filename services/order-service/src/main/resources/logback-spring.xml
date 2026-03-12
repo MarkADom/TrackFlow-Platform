@@ -4,6 +4,8 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <batchMaxItems>100</batchMaxItems>
+        <batchTimeoutMs>5000</batchTimeoutMs>
         <http>
             <url>http://localhost:3100/loki/api/v1/push</url>
         </http>
@@ -12,7 +14,7 @@
                 <pattern>app=order-service,host=${HOSTNAME},level=%level</pattern>
             </label>
             <message>
-                <pattern>${FILE_LOG_PATTERN}</pattern>
+                <pattern>level=%level logger=%logger{36} thread=%thread | %msg%n</pattern>
             </message>
         </format>
     </appender>
