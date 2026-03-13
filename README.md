@@ -9,6 +9,24 @@
 TrackFlow is a logistics tracking platform built with Java 21, Spring Boot 3, and Apache Kafka.
 It demonstrates event-driven microservices communication across three independent services.
 
+## Technology Stack
+
+- Java 21
+- Spring Boot 3
+- Apache Kafka (KRaft mode)
+- PostgreSQL
+- Gradle
+- Grafana LGTM stack (Prometheus, Loki, Tempo, Grafana)
+
+## Project Goals
+
+TrackFlow was built to demonstrate:
+
+- Event-driven microservices architecture
+- Kafka-based service communication
+- Distributed system observability with Prometheus, Loki, Tempo, and Grafana
+- Debugging and monitoring of asynchronous systems
+
 ## Services
 
 | Service | Port | Database | Responsibility |
@@ -25,6 +43,36 @@ It demonstrates event-driven microservices communication across three independen
 ```
 
 Communication is hybrid: synchronous HTTP for client-facing APIs, asynchronous Kafka for cross-service propagation.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Event Contract](docs/event-contract.md)
+- [Engineering Decisions](docs/engineering-decisions.md)
+
+## Quickstart
+
+Minimal steps to run the system locally and validate it works.
+
+**1. Start Kafka**
+
+```bash
+docker compose up -d
+```
+
+**2. Start the services**
+
+```bash
+cd services/order-service        && ./gradlew bootRun
+cd services/tracking-service     && ./gradlew bootRun
+cd services/notification-service && ./gradlew bootRun
+```
+
+**3. Run the smoke test**
+
+```bash
+./scripts/smoke.sh
+```
 
 ## Prerequisites
 
@@ -95,12 +143,13 @@ cd services/notification-service && ./gradlew bootRun
 
 ## Observability
 
-TrackFlow integrates with a local Grafana LGTM stack (Prometheus, Loki, Tempo, Grafana). The stack runs independently from a separate Compose project — it is not bundled in TrackFlow's `docker-compose.yml`.
+TrackFlow integrates with a local Grafana LGTM stack (Prometheus, Loki, Tempo, Grafana). The stack is not bundled in this repository and runs from a separate infrastructure project.
 
 **Start the observability stack:**
 
 ```bash
-cd /mnt/ai_core/infra/observability && docker compose up -d
+# The path below is the author's local environment — adjust to your own infrastructure project location.
+cd /path/to/your/infra/observability && docker compose up -d
 ```
 
 Once running, each TrackFlow service automatically pushes metrics, logs, and traces to it. No configuration changes are needed.
@@ -173,3 +222,14 @@ http://localhost:8081/swagger-ui/index.html
 http://localhost:8082/swagger-ui/index.html
 http://localhost:8083/swagger-ui/index.html
 ```
+## Repository Purpose
+
+This repository is intended as a learning and demonstration project
+for distributed backend architecture using Spring Boot and Kafka.
+
+It focuses on:
+
+- event-driven service communication
+- microservice boundaries
+- observability and debugging
+- failure handling through retries and dead-letter queues

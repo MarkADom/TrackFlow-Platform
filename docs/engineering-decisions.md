@@ -90,3 +90,12 @@ Notable design decisions, the options considered, and the rationale behind each.
 **Problem:** On low-traffic services the appender's default batch never filled, and the timeout was long enough that log lines were delayed or dropped entirely during short-lived test runs.
 
 **Rationale:** Explicit settings make flush behaviour predictable regardless of traffic volume. The chosen values (`100` items, `5 s`) are conservative enough to avoid back-pressure while ensuring logs arrive in Loki within a few seconds of being emitted.
+
+
+## Future Considerations
+
+Potential future changes include:
+
+- introducing schema versioning for Kafka events
+- containerizing services for production deployment
+- externalizing notification providers

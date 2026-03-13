@@ -6,6 +6,15 @@
 
 TrackFlow is a logistics tracking platform that manages shipment orders from creation through delivery. It demonstrates event-driven communication across three independent microservices: a client-facing order API, a tracking history service, and a notification service.
 
+## Architecture Principles
+
+TrackFlow follows a set of architectural principles:
+
+- **Database per service** — each service owns its persistence layer
+- **Event-driven communication** — services communicate asynchronously through Kafka
+- **Failure isolation** — service outages do not cascade across the platform
+- **Observability-first design** — metrics, logs, and traces are emitted by default
+
 ## Service Responsibilities
 
 | Service | Responsibility |
@@ -23,14 +32,14 @@ TrackFlow is a logistics tracking platform that manages shipment orders from cre
 
 ```
                         ┌─────────────────────┐
-                        │    order-service     │
-                        │       :8081          │
+                        │    order-service    │
+                        │       :8081         │
                         └─────────┬───────────┘
                                   │ publishes ShipmentEvent
                                   ▼
                         ┌─────────────────────┐
-                        │   shipment-events    │
-                        │  (3 partitions)      │
+                        │   shipment-events   │
+                        │  (3 partitions)     │
                         └──────┬──────────────┘
                                │
                ┌───────────────┴───────────────┐
@@ -88,3 +97,14 @@ The pre-built dashboard at `docs/grafana/trackflow-dashboard.json` includes five
 | HTTP Request Rate | Time series (Prometheus) |
 | JVM Heap Memory | Time series (Prometheus) |
 | Service Logs | Logs (Loki) |
+
+## System Boundaries
+
+TrackFlow intentionally excludes several production concerns:
+
+- authentication and authorization
+- external notification providers
+- production deployment infrastructure
+
+The focus of the project is demonstrating event-driven service communication
+and observability in a distributed backend system.

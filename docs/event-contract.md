@@ -20,6 +20,23 @@ The canonical event published by **order-service** and consumed by **tracking-se
 | `notes` | String | Optional; nullable |
 | `occurredAt` | LocalDateTime | Timestamp of the status change, set by order-service |
 
+## Event Lifecycle
+
+1. order-service publishes `ShipmentEvent` to `shipment-events`.
+2. tracking-service consumes the event and records a tracking entry.
+3. notification-service consumes the event and attempts to send a webhook notification.
+4. If notification delivery fails repeatedly, the event is published to `shipment-events.DLQ`.
+
+## Schema Evolution
+
+The `ShipmentEvent` schema is considered a stable contract between services.
+
+Schema changes must follow backward-compatible rules:
+
+- new optional fields may be added
+- existing fields must not be removed
+- field types must remain compatible
+
 ### OrderStatus Enum
 
 ```
