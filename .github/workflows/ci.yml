@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Build order-service
+        run: |
+          cd services/order-service
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build tracking-service
+        run: |
+          cd services/tracking-service
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build notification-service
+        run: |
+          cd services/notification-service
+          chmod +x gradlew
+          ./gradlew build
