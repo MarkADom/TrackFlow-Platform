@@ -1,0 +1,26 @@
+meta {
+  name: Get Tracking History by Order ID
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{tracking_service_url}}/api/v1/tracking/{{order_id}}/history
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Returns array", function() {
+    expect(res.body).to.be.an("array");
+  });
+  test("At least one entry", function() {
+    expect(res.body.length).to.be.greaterThan(0);
+  });
+  test("First entry is CREATED", function() {
+    expect(res.body[0].status).to.equal("CREATED");
+  });
+}

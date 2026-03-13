@@ -1,0 +1,23 @@
+meta {
+  name: Get Tracking History by Tracking Code
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{tracking_service_url}}/api/v1/tracking/code/{{tracking_code}}/history
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  test("Returns array", function() {
+    expect(res.body).to.be.an("array");
+  });
+  test("Tracking code matches", function() {
+    expect(res.body[0].trackingCode).to.equal(bru.getEnvVar("tracking_code"));
+  });
+}

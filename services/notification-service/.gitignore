@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Environment
+.envrc
+
+# Spring Boot
+application-local.yml
+
+# OS
+.DS_Store
+Thumbs.db

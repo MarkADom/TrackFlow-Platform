@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <batchMaxItems>100</batchMaxItems>
+        <batchTimeoutMs>5000</batchTimeoutMs>
+        <http>
+            <url>http://localhost:3100/loki/api/v1/push</url>
+        </http>
+        <format>
+            <label>
+                <pattern>app=tracking-service,host=${HOSTNAME},level=%level</pattern>
+            </label>
+            <message>
+                <pattern>level=%level logger=%logger{36} thread=%thread | %msg%n</pattern>
+            </message>
+        </format>
+    </appender>
+
+    <logger name="io.opentelemetry.exporter.internal.http.HttpExporter" level="ERROR"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="LOKI"/>
+    </root>
+</configuration>
